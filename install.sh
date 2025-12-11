@@ -7,7 +7,11 @@ BRANCH="main"
 
 INSTALL_DIR="$HOME/.git-safe-check/bin"
 TARGET_FILE="$INSTALL_DIR/git"
-SOURCE_URL="https://raw.githubusercontent.com/$REPO_USER/$REPO_NAME/$BRANCH/src/git-safe-check.sh"
+RULE_FILE="$INSTALL_DIR/rule.sh"
+
+BASE_URL="https://raw.githubusercontent.com/$REPO_USER/$REPO_NAME/$BRANCH/src"
+SOURCE_URL="$BASE_URL/git-safe-check.sh"
+RULE_SOURCE_URL="$BASE_URL/rule.sh"
 
 echo -e "\n🛡️  Installing Git Safety Check..."
 
@@ -16,11 +20,13 @@ if [ ! -d "$INSTALL_DIR" ]; then
     echo "📁 Created directory: $INSTALL_DIR"
 fi
 
-echo "⬇️  Downloading script..."
+echo "⬇️  Downloading scripts..."
 if command -v curl >/dev/null 2>&1; then
     curl -fsSL "$SOURCE_URL" -o "$TARGET_FILE"
+    curl -fsSL "$RULE_SOURCE_URL" -o "$RULE_FILE"
 elif command -v wget >/dev/null 2>&1; then
     wget -qO "$TARGET_FILE" "$SOURCE_URL"
+    wget -qO "$RULE_FILE" "$RULE_SOURCE_URL"
 else
     echo "❌ Error: Neither curl nor wget found. Cannot download."
     exit 1
@@ -35,14 +41,14 @@ if [ -n "$ZSH_VERSION" ]; then
 elif [ -n "$BASH_VERSION" ]; then
     SHELL_CONFIG="$HOME/.bashrc"
 else
-    SHELL_CONFIG="$HOME/.bashrc" 
+    SHELL_CONFIG="$HOME/.bashrc"
     echo "⚠️  Could not detect shell. Defaulting to $SHELL_CONFIG"
 fi
 
 PATH_EXPORT="export PATH=\"$INSTALL_DIR:\$PATH\""
 MARKER="# Git Safe Check Tool"
 
-if grep -q "$MARKER" "$SHELL_CONFIG"; then
+if grep -q "$MARKER" "$SHELL_CONFIG" 2>/dev/null; then
     echo "ℹ️  Path already configured in $SHELL_CONFIG"
 else
     echo "" >> "$SHELL_CONFIG"
